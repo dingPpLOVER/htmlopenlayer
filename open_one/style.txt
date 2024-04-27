@@ -1,0 +1,18 @@
+Style
+Style即可直接在要素（Feature）设置，也可以在矢量数据源（Source）上设置。
+
+ol.style.Style：矢量要素渲染样式的容器；
+Fill：设置矢量要素的填充样式；
+Icon：设置矢量要素的icon样式；
+Text：设置矢量要素的文本样式；
+Circle：设置矢量要素的圆形样式；
+Stroke：设置矢量要素的描边样式；
+RegularShape：设置矢量要素的常规形状样式；
+const iconStyle = new ol.style.Style({
+    image: new ol.style.Icon({
+        anchor: [0.5, 0.5],
+        color: 'red',
+        src: './img/point.png',
+        width: 50
+    })
+})

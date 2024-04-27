@@ -37,12 +37,12 @@ $(function() {
 						}
 					}
 				}), // 使用高德地图
-				// projection: 'EPSG:4326'//投影
+				projection: 'EPSG:3857'//投影
 			})
 		], 
 		view: new ol.View({
-			center: [127, 47], // 设置地图中心坐标（经纬度）
-			zoom: 10, // 设置地图缩放级别
+			center:  [127.333, 47.333], // 设置地图中心坐标（经纬度）
+			zoom: 7, // 设置地图缩放级别
 			projection: 'EPSG:4326'//投影
 		})
 	});
