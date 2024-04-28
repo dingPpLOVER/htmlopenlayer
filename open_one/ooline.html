@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>openlayers线</title>
+		<link rel="stylesheet" href="common/ol6/ol.css" type="text/css">
+		<script src="common/ol6/ol.js"></script>
+		<script src="common/jquery/jquery-3.4.1.js"></script>
+
+
+	</head>
+	<body>
+		<div id="map" style="width:100%; height: 100%;position: absolute;"></div>
+	</body>
+
+
+	<script>
+		// 初始化地图
+		var map = new ol.Map({
+			target: 'map', // 地图容器的 ID
+			layers: [
+				new ol.layer.Tile({
+					source: new ol.source.XYZ({
+						url: 'http://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}'
+					}), // 使用高德地图
+					projection: 'EPSG:4326'
+				})
+			],
+			view: new ol.View({
+				center: ol.proj.fromLonLat([127.333, 47.333]), // 设置地图中心坐标（经纬度）
+				zoom: 7, // 设置地图缩放级别
+				projection: 'EPSG:3857'
+			})
+		});
+		console.log(ol.proj.fromLonLat([127.333, 47.333]))
+
+
+		function point(map) {
+			$.ajax({
+				type: 'get',
+				url: 'json/point.json',
+				success: function(res) {
+					var vectorLayer = new ol.layer.Vector({
+						source: new ol.source.Vector()
+					});
+
+					for (var i = 0; i < res.length; i++) {
+						console.log([res[i].Lon, res[i].Lat])
+						var point = new ol.Feature({
+							geometry: new ol.geom.Point(ol.proj.fromLonLat([res[i].Lon, res[i].Lat])),
+							name: res[i].stationName
+						});
+						var name = res[i].stationName
+						point.setStyle(text(name))
+						vectorLayer.getSource().addFeature(point)
+						var feature = new ol.Feature({
+							geometry: new ol.geom.LineString([ol.proj.fromLonLat([res[i].Lon, res[i]
+								.Lat]), ol.proj.fromLonLat([res[6].Lon, res[6].Lat])
+							])
+						})
+						vectorLayer.getSource().addFeature(feature)
+					}
+					map.addLayer(vectorLayer);
+					// console.log(vectorLayer)
+				}
+			})
+		}
+
+		point(map)
+
+		function polygon(map) {
+			$.ajax({
+				type: 'get',
+				url: 'json/polygon.json',
+				success: function(res) {
+					// console.log(res)
+					var vectorLayer = new ol.layer.Vector({
+						source: new ol.source.Vector(),
+						type: 'Polygon', //绘制多边形
+						freehand: true, //允许自由绘制
+					});
+					
+					for (var i = 0; i < res.geometries.length; i++) {
+						var geo = res.geometries[i]
+						var allarr = []
+						for (var j = 0; j < geo.coordinates.length; j++) {
+							var coor = geo.coordinates[j]
+							
+							for(var k = 0 ; k < coor.length ; k ++ ){
+								coor[k] = ol.proj.fromLonLat(coor[k])
+								console.log(coor[k])
+							}
+							var polygon = new ol.Feature({
+								geometry: new ol.geom.Polygon([geo.coordinates[j]])
+								
+								// geometry: new ol.geom.Polygon([[ol.proj.fromLonLat([127, 47]), ol.proj.fromLonLat([128, 47]), ol.proj.fromLonLat([128, 48]),ol.proj.fromLonLat([127, 47])]])
+							})
+							polygon.setStyle(new ol.style.Style({
+							    fill: new ol.style.Fill({
+							        color: 'rgba(123, 237, 159,0.5)'
+							    }),
+							    stroke: new ol.style.Stroke({
+							        color: '#4a8fff',
+							        width: 4
+							    }),
+							    image: new ol.style.Circle({
+							        radius: 7,
+							        fill: new ol.style.Fill({
+							            color: '#4a8fff'
+							        })
+							    })
+							}));
+							vectorLayer.getSource().addFeature(polygon)
+						}
+					}
+					console.log(allarr)
+					map.addLayer(vectorLayer);
+				}
+			})
+		}
+
+		polygon(map)
+
+		function text(name) {
+			return new ol.style.Style({
+				text: new ol.style.Text({
+					text: name,
+					font: '25px',
+					fill: new ol.style.Fill({
+						color: '#3900ab',
+					}),
+					offsetY: 15,
+					textAlign: 'left' //文字对齐方式
+				}),
+				image: new ol.style.Circle({
+					radius: 6,
+					fill: new ol.style.Fill({
+						color: '#ff0000',
+					}),
+					width: 50
+				})
+			})
+		}
+		map.on('click', function(event) {
+			var coordinate = event.coordinate
+			// 在点击位置添加标记
+			var marker = new ol.Feature({
+				geometry: new ol.geom.Point(coordinate)
+			});
+			var markerLayer = new ol.layer.Vector({
+				source: new ol.source.Vector({
+					features: [marker]
+				})
+			});
+			alert(event.coordinate)
+			map.addLayer(markerLayer);
+		})
+	</script>
+</html>

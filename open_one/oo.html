@@ -56,19 +56,34 @@
 						vectorLayer.getSource().addFeature(point)
 
 					}
+
 					map.addLayer(vectorLayer);
-					console.log(vectorLayer)
+
 				}
 			})
 		}
 
 		point(map)
+		map.on('click', function(event) {
+			var coordinate = event.coordinate
+			// 在点击位置添加标记
+			var marker = new ol.Feature({
+				geometry: new ol.geom.Point(coordinate)
+			});
+			var markerLayer = new ol.layer.Vector({
+				source: new ol.source.Vector({
+					features: [marker]
+				})
+			});
+			alert(event.coordinate)
+			map.addLayer(markerLayer);
+		})
 
 		function text(name) {
 			return new ol.style.Style({
 				text: new ol.style.Text({
 					text: name,
-					font:'18px',
+					font: '25px',
 					fill: new ol.style.Fill({
 						color: '#3900ab',
 					}),
